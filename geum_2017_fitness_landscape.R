@@ -2,7 +2,7 @@
 setwd("C:/Users/Mason Kulbaba/Dropbox/git/geum-aster")
 
 
-dat<- read.csv("fitness_landscape_data_cleaned.csv")
+dat<- read.csv("cleaned_data_for_aster_with_predictors.csv")
 
 
 
@@ -59,7 +59,7 @@ library(MASS)
 
 #2016 flw no
 fl.1<- fitdistr(flwno, "normal")
-fl.2<- fitdistr(flwno, "negative binomial")#size: 0.087611463
+fl.2<- fitdistr(flwno, "negative binomial")#size: 0.165422825
 fl.3<- fitdistr(flwno, "poisson")
 
 AIC(fl.1, fl.2, fl.3)
@@ -67,7 +67,7 @@ fl.2
 
 #2017 flw no
 fl2.1<- fitdistr(flwno2, "normal")
-fl2.2<- fitdistr(flwno2, "negative binomial")#size: 0.30514117
+fl2.2<- fitdistr(flwno2, "negative binomial")#size: 1.1387474
 fl2.3<- fitdistr(flwno2, "poisson")
 
 AIC(fl2.1, fl2.2, fl2.3)
@@ -75,7 +75,7 @@ fl2.2
 
 #2016 fruit number
 frt.1<- fitdistr(frtno, "normal")
-frt.2<- fitdistr(frtno, "negative binomial")#size: 0.027821465
+frt.2<- fitdistr(frtno, "negative binomial")#size: 0.04617859
 frt.3<- fitdistr(frtno, "poisson")
 
 AIC(frt.1, frt.2, frt.3)
@@ -83,7 +83,7 @@ frt.2
 
 #2017 fruit number
 frt2.1<- fitdistr(frtno2, "normal")
-frt2.2<- fitdistr(frtno2, "negative binomial")#size: 0.23720330
+frt2.2<- fitdistr(frtno2, "negative binomial")#size: 0.65115940
 frt2.3<- fitdistr(frtno2, "poisson")
 
 AIC(frt2.1, frt2.2, frt2.3)
@@ -91,7 +91,7 @@ frt2.2
 
 #seeds set (2016 + 2017)
 seed.1<- fitdistr(seeds, "normal")
-seed.2<- fitdistr(seeds, "negative binomial")#size: 8.544092e-02
+seed.2<- fitdistr(seeds, "negative binomial")#size: 2.336009e-01
 seed.3<- fitdistr(seeds, "poisson")
 
 AIC(seed.1, seed.2, seed.3)
@@ -156,10 +156,10 @@ library(aster)
 #set up custom family list
 
 famlist <- list(fam.bernoulli(),
-                fam.negative.binomial(0.087611463),
-                fam.negative.binomial(0.30514117),
-                fam.negative.binomial(0.027821465),
-                fam.negative.binomial(0.23720330), 
+                fam.negative.binomial(0.165422825),
+                fam.negative.binomial(1.1387474),
+                fam.negative.binomial(0.04617859),
+                fam.negative.binomial(0.65115940), 
                 fam.negative.binomial(0.0058024283),
                 fam.negative.binomial(0.08457787),
                 fam.negative.binomial(8.544092e-02))
@@ -176,22 +176,15 @@ fam<- c(1,1,1,1,1,2,3,4,5,6,7,8)
 #fixed effect model for 2017 with only fitness: note the use of 'famlist'
 aouta<- aster(resp~varb, pred, fam, varb, id, root, data=redata2017,famlist = famlist)
 
-summary(aouta, show.graph=T, info.tol = 1e-10)
+summary(aouta, show.graph=T, info.tol = 1e-11)
 
 #include HabitatType in model
 aout<- aster(resp~varb + fit:(Region), pred, fam, varb, id, root, data=redata2017, famlist=famlist)
 
 
-summary(aout, show.graph = TRUE, info.tol=1e-10)
+summary(aout, show.graph = TRUE, info.tol=1e-11)
 
 anova(aouta, aout)#Region is significant
-
-aoutb<- aster(resp~varb + fit:(Block.ID), pred, fam, varb, id, root, data=redata2017, famlist=famlist)
-
-summary(aoutb, show.graph=T, info.tol=1e-11)
-
-anova(aouta, aoutb)#block on it's own is not significant
-
 
 
 ###############################################
