@@ -24,7 +24,7 @@ dat2<-dat3
 
 
 ######################
-vars<- c("Germination.Y.N", "Survival.Y.N","Surv2017", "Flower.Y.N.2016","Flower.Y.N.2017",
+vars<- c("Germination.Y.N", "Survival.Y.N","Surv2017",
          "No.Flowers.2016","Total.Flowers.2017","No.Fruit.2016", "No.Fruit.2017","sm", "sm.2", "sm2017")
 
 
@@ -168,9 +168,9 @@ famlist <- list(fam.bernoulli(),
 
 
 
-pred<- c(0,1,2,2,3,4,5,6,7,8,9,1)
+pred<- c(0,1,2,2,3,4,5,6,7,1)
 
-fam<- c(1,1,1,1,1,2,3,4,5,6,7,8)
+fam<- c(1,1,1,2,3,4,5,6,7,8)
 #sapply(fam.default(), as.character)[fam]
 
 #fixed effect model for 2017 with only fitness: note the use of 'famlist'
@@ -182,148 +182,100 @@ summary(aouta, show.graph=T, info.tol = 1e-11)
 aout<- aster(resp~varb + fit:(Region), pred, fam, varb, id, root, data=redata2017, famlist=famlist)
 
 
-summary(aout, show.graph = TRUE, info.tol=1e-11)
+summary(aout, show.graph = TRUE, info.tol=1e-13)
 
 anova(aouta, aout)#Region is significant
 
-
-###############################################
-
-# Split redata2017 into region-specific data, add block.id, and estiamte
-# mean fitness to habitat-specific aster models, and generate fitness estiamtes
-
-levels(redata2017$Region)
-
-
-redata.gla<- subset(redata2017, Region=="GL_alvar")
-redata.gla<- droplevels(redata.gla)
-
-redata.mba<- subset(redata2017, Region=="MB_alvar")
-redata.mba<- droplevels(redata.mba)
-
-redata.p<- subset(redata2017, Region=="Prairie")
-redata.p<- droplevels(redata.p)
-
-#make sure block.id still a factor
-redata.gla$Block.ID<- as.factor(redata.gla$Block.ID)
-redata.mba$Block.ID<- as.factor(redata.mba$Block.ID)
-redata.p$Block.ID<- as.factor(redata.p$Block.ID)
-
-## split origional data file (dat2) into alvar and prairie data to
-# estiamte distribution parameters for alvar and prairie subsets
-
-dat2.gla<- subset(dat2, Region=="GL_alvar")
-dat2.gla<- droplevels(dat2.gla)
-
-dat2.mba<- subset(dat2, Region=="MB_alvar")
-dat2.mba<- droplevels(dat2.mba)
-
-dat2.p<- subset(dat2, Region=="Prairie")
-dat2.p<- droplevels(dat2.p)
-
-
-#begin estimating 'gl_alvar' distributions
-
-flwno1<- dat2.gla$No.Flowers.2016
-
-flwno2<- dat2.gla$Total.Flowers.2017
-
-frt1<- dat2.gla$No.Fruit.2016
-
-frt2<- dat2.gla$No.Fruit.2017
-
-sm<- dat2.gla$sm
-
-sm2<- dat2.gla$sm.2
-
-sm2017<- dat2.gla$sm2017
-
-
-#flwno1
-flwno1.1 <- fitdistr(flwno1, "normal")
-flwno1.2 <- fitdistr(flwno1, "negative binomial")#size: 0.23784984
-flwno1.3 <- fitdistr(flwno1, "poisson")
-
-AIC(flwno1.1, flwno1.2, flwno1.3)
-flwno1.2
-
-#flwno2
-flwno2.1 <- fitdistr(flwno2, "normal")
-flwno2.2 <- fitdistr(flwno2, "negative binomial")#size: 1.49100042
-flwno2.3 <- fitdistr(flwno2, "poisson")
-
-AIC(flwno2.1, flwno2.2, flwno2.3)
-flwno2.2
-
-#frt1
-frt1.1 <- fitdistr(frt1, "normal")
-frt1.2 <- fitdistr(frt1, "negative binomial")#size: 0.06728733
-frt1.3 <- fitdistr(frt1, "poisson")
-
-AIC(frt1.1, frt1.2, frt1.3)
-frt1.2
-
-#frt2
-frt2.1 <- fitdistr(frt2, "normal")
-frt2.2 <- fitdistr(frt2, "negative binomial")#size: 0.91304234
-frt2.3 <- fitdistr(frt2, "poisson")
-
-AIC(frt2.1, frt2.2, frt2.3)
-frt2.2
-
-#sm
-sm.1 <- fitdistr(sm, "normal")
-sm.2 <- fitdistr(sm, "negative binomial")#size: 0.013494317
-sm.3 <- fitdistr(sm, "poisson")
-
-AIC(sm.1, sm.2, sm.3)
-sm.2
-
-#sm.2
-sm2.1 <- fitdistr(sm2, "normal")
-sm2.2 <- fitdistr(sm2, "negative binomial")#size: 0.32842301
-sm2.3 <- fitdistr(sm2, "poisson")
-
-AIC(sm2.1, sm2.2, sm2.3)
-sm2.2
-
-
-#sm2017
-sm2017.1 <- fitdistr(sm2017, "normal")
-sm2017.2 <- fitdistr(sm2017, "negative binomial")#size:  0.33367351
-sm2017.3 <- fitdistr(sm2017, "poisson")
-
-AIC(sm2017.1, sm2017.2, sm2017.3)
-sm2017.2
-
-#make new famlist for alvar data
-famlist.gla <- list(fam.bernoulli(),
-                fam.negative.binomial(0.23784984),
-                fam.negative.binomial(1.49100042),
-                fam.negative.binomial(0.06728733),
-                fam.negative.binomial(0.91304234), 
-                fam.negative.binomial(0.013494317),
-                fam.negative.binomial(0.32842301),
-                fam.negative.binomial(0.33367351))
-
-
-#alvar aster analysis with only fitness data
-aout.a1<- aster(resp~varb, pred, fam, varb, id, root, data=redata.gla,famlist = famlist.gla)
-
-summary(aout.a1, show.graph=T, info.tol=1e-16)
-
-
-
-aout3<- aster(resp~varb+0+Dist.from.cg.km + No.Days.to.Germ + I(Dist.from.cg.km^2) + I(No.Days.to.Germ^2) + I(2*Dist.from.cg.km*No.Days.to.Germ), pred, fam, varb, id, root, 
-              maxiter=100000,data=redata.gla, famlist = famlist.gla)
+aout3<- aster(resp~varb + fit:Region+Dist.from.cg.km + No.Days.to.Germ + I(Dist.from.cg.km^2) + I(No.Days.to.Germ^2) + I(2*Dist.from.cg.km*No.Days.to.Germ), pred, fam, varb, id, root, 
+              data=redata2017, famlist = famlist)
 
 summary(aout3, show.graph=T, info.tol=1e-13)
 
+aout3$coefficients
 
-#Lande and Arnold landscape approach
+aout<- aout3
+
+
+######################################################################
+# Estimate Selection Gradient (distance from source)
+
+pout <- predict(aout)
+pout <- matrix(pout, nrow = nrow(aout1$x), ncol = ncol(aout1$x))
+colnames(pout) <- colnames(aout1$x)
+mufit <- pout[, grep("sm2017", colnames(pout))]
+
+
+#only needed when >1 year of data
+#mufit <- apply(mufit, 1, "sum")
+
+#calcualte mean fitness
+wmu <- mufit/mean(mufit)
+
+#perform linear analysis
+wmout <- lm(wmu ~ dat.gla$Dist.from.cg.km)
+
+pre_w<- predict(wmout)
+
+summary(wmout)
+
+
+#Now try with two predictors dist to source and days to germination
+
+#see new aout model on line 125
+
+#extract two coeff
+
+a1 <- aout$coefficients["Dist.from.cg.km"]
+a2 <- aout$coefficients["No.Days.to.Germ"]
+a <- c(a1, a2)
+
+A11 <- aout$coefficients["I(Dist.from.cg.km^2)"]
+A22 <- aout$coefficients["I(No.Days.to.Germ^2)"]
+A12 <- aout$coefficients["I(2 * Dist.from.cg.km * No.Days.to.Germ)"]
+A <- matrix(c(A11, A12, A12, A22), 2, 2)
+
+eigen(A, symmetric = TRUE, only.values = TRUE)$values
+
+
+max8 <- (-solve(A, a)/2)
+print(max8)
+
+
+#Plot dist from source & days to germ, on fitness contours
+
+par(mar=c(5.5, 4.5, 4.5, 8.5), xpd=TRUE)
+
+plot(dat2$Dist.from.cg.km, dat2$No.Days.to.Germ, xlab = "Dist.", 
+     ylab = "Days to Germ", col=dat2$Region, pch=16)
+
+legend("topright", inset=c(-.6,0), legend=c("Great Lakes Alvar", "Manitoba Alvar", "Prairie"),col=1:3, pch=16, title="Region", bty="n")
+
+
+ufoo <- par("usr")
+nx <- 101
+ny <- 101
+z <- matrix(NA, nx, ny)
+x <- seq(ufoo[1], ufoo[2], length = nx)
+y <- seq(ufoo[3], ufoo[4], length = ny)
+points(max8[1], max8[2], pch = 17, col=4)
+for (i in 1:nx) {
+  for (j in 1:ny) {
+    b <- c(x[i], y[j])
+    z[i, j] <- sum(a * b) + as.numeric(t(b) %*% A %*%
+                                         + b)
+  }
+}
+b <- as.numeric(max8)
+contour(x, y, z, add = TRUE)
+contour(x, y, z, levels = c(0.325), add = TRUE)
+
+
+####################################################################
+#Now use Lande and Arnold (1983) method for comparison
+
 
 dat2$relfit <- dat2$sm2017/mean(dat2$sm2017)
-lout <- lm(relfit ~ Dist.from.cg.km + No.Days.to.Germ + I(Dist.from.cg.km^2) +
+lout <- lm(relfit ~ Region + Dist.from.cg.km + No.Days.to.Germ + I(Dist.from.cg.km^2) +
              I(No.Days.to.Germ^2) + I(2*Dist.from.cg.km*No.Days.to.Germ), data = dat2)
 summary(lout)
 
@@ -345,7 +297,14 @@ print(max8)
 
 
 #plot OLS (Lande and Arnold) way
+
+
+par(mar=c(5.5, 4.5, 4.5, 8.5), xpd=TRUE)
+
 plot(dat2$Dist.from.cg.km, dat2$No.Days.to.Germ, xlab = "Dist.", ylab = "Days to Germ")
+
+legend("topright", inset=c(-.6,0), legend=c("Great Lakes Alvar", "Manitoba Alvar", "Prairie"),col=1:3, pch=16, title="Region", bty="n")
+
 ufoo <- par("usr")
 nx <- 101
 ny <- 101
@@ -363,446 +322,3 @@ for (i in 1:nx) {
 b <- as.numeric(max8)
 contour(x, y, z, add = TRUE)
 contour(x, y, z, levels = c(0.325), add = TRUE)
-
-
-
-
-
-#check for coefficients of above model
-
-aout3$coefficients
-
-aout<- aout3
-
-
-
-
-
-aout<- aster(resp~varb +fit:(Block.ID), pred, fam, varb, id, root, data=redata.gla,famlist = famlist.gla)
-
-summary(aout, show.graph=T, info.tol = 1e-11)
-
-anova(aout.a1, aout)#block not significant for GL_alvar, but that's ok
-
-
-
-# generate MLE of saturated model mean value parameter vector: mu
-pout<- predict.aster(aout, se.fit=TRUE, info.tol=1e-10)
-
-# make up  data for hypothetical individual that meet "typical" criteria:
-# Therefore, "make up" covariate data for hypothetical individuals that are comparable and obtain mean values for them
-
-# make data.frame of indivudals for each habitat type (Alvar and Prairie)
-
-fred <- data.frame(Block.ID=levels(redata.gla$Block.ID),
-                   Germination.Y.N=1, Survival.Y.N=1,Surv2017=1, Flower.Y.N.2016=1,
-                   No.Flowers.2016=1, Flower.Y.N.2017=1, Total.Flowers.2017=1, 
-                   No.Fruit.2016=1, No.Fruit.2017=1, sm=1, sm.2=1, sm2017=1, root = 1)
-
-# reshape the "made up data" just as the actual data
-renewdata <- reshape(fred, varying = list(vars),
-                     direction = "long", timevar = "varb",
-                     times = as.factor(vars), v.names = "resp")
-
-# make character string from "varb" of renewdata, without actual values (e.g., the layers of varb in renewdata)
-layer<- gsub("[0-9]", "", as.character(renewdata$varb))
-
-# add layer to renewdata
-renewdata<- data.frame(renewdata, layer= layer)
-
-# add Seedmass.2016 in new layer col of renewdata as numeric, called fit
-fit<- as.numeric(layer=="sm2017")
-
-#charlie add
-renewdata$fit <- as.numeric(as.character(renewdata$varb) == "sm2017")
-
-# add fit to renewdata
-renewdata<- data.frame(renewdata, fit = fit)
-
-
-#Generate fintess estimates and standard errors for each block
-nReg<- nrow(fred)#all data has same number of blocks so any file will do
-nnode<- length(vars)
-amat<- array(0, c(nReg, nnode, nReg))
-dim(amat)# makes an 12 x 12 x 12 matrix (2 habitat types and 6 nodes of graphicla model)
-
-#only want means for k'th individual that contribute to expected
-#fitness, and want to add only Seedmass.2016 entries
-
-foo<- grepl("sm2017", vars)
-for(k in 1:nReg)
-  amat[k, foo, k]<- 1
-
-#check
-foo #yes, only last node is "true"; corresponds to Seedmass.2016
-
-#generate predicted valuses using aout object, with renewdata, and amat format
-pout.amat<- predict(aout, newdata= renewdata, varvar= varb,
-                    idvar= id, root = root, se.fit=TRUE, amat = amat, info.tol=1e-10)
-
-#combine estimates with standard error, and then round
-#to three decimal places
-gl.a<- cbind(pout.amat$fit, pout.amat$se.fit)
-
-
-rownames(gl.a)<- as.character(fred$Block.ID)
-
-
-colnames(gl.a)<- c("Expected Fitness", "SE")
-
-#Expected fitness for blocks in GL_alvar region
-
-#as block does not explain a sifnificant amount of variation, can omit and used following estimates
-round(gl.a, 3) 
-
-summary(gl.a)#median= 615.8 -> corresponds with block 9: 576.436 (125.247)
-
-
-#########################################################################
-# MB_alvar analysis
-
-#begin estimating 'alvar' distributions
-
-flwno1<- dat2.mba$No.Flowers.2016
-
-flwno2<- dat2.mba$Total.Flowers.2017
-
-frt1<- dat2.mba$No.Fruit.2016
-
-frt2<- dat2.mba$No.Fruit.2017
-
-sm<- dat2.mba$sm
-
-sm2<- dat2.mba$sm.2
-
-sm2017<- dat2.mba$sm2017
-
-
-#flwno1
-flwno1.1 <- fitdistr(flwno1, "normal")
-flwno1.2 <- fitdistr(flwno1, "negative binomial")#size: 0.06758479
-flwno1.3 <- fitdistr(flwno1, "poisson")
-
-AIC(flwno1.1, flwno1.2, flwno1.3)
-flwno1.2
-
-#flwno2
-flwno2.1 <- fitdistr(flwno2, "normal")
-flwno2.2 <- fitdistr(flwno2, "negative binomial")#size: 0.56971309
-flwno2.3 <- fitdistr(flwno2, "poisson")
-
-AIC(flwno2.1, flwno2.2, flwno2.3)
-flwno2.2
-
-#frt1
-frt1.1 <- fitdistr(frt1, "normal")
-frt1.2 <- fitdistr(frt1, "negative binomial")#size: 0.006770819
-frt1.3 <- fitdistr(frt1, "poisson")
-
-AIC(frt1.1, frt1.2, frt1.3)
-frt1.2
-
-#frt2
-frt2.1 <- fitdistr(frt2, "normal")
-frt2.2 <- fitdistr(frt2, "negative binomial")#size: 0.30670838
-frt2.3 <- fitdistr(frt2, "poisson")
-
-AIC(frt2.1, frt2.2, frt2.3)
-frt2.2
-
-#sm
-sm.1 <- fitdistr(sm, "normal")
-sm.2 <- fitdistr(sm, "negative binomial")#size: 0.009840565
-sm.3 <- fitdistr(sm, "poisson")
-
-AIC(sm.1, sm.2, sm.3)
-sm.2
-
-#sm.2
-sm2.1 <- fitdistr(sm2, "normal")
-sm2.2 <- fitdistr(sm2, "negative binomial")#size: 1.420398e-01
-sm2.3 <- fitdistr(sm2, "poisson")
-
-AIC(sm2.1, sm2.2, sm2.3)
-sm2.2
-
-#sm2017
-sm2017.1 <- fitdistr(sm2017, "normal")
-sm2017.2 <- fitdistr(sm2017, "negative binomial")#size: 8.883848e-02
-sm2017.3 <- fitdistr(sm2017, "poisson")
-
-AIC(sm2017.1, sm2017.2, sm2017.3)
-sm2017.2
-
-#make new famlist for alvar data
-famlist.mba <- list(fam.bernoulli(),
-                    fam.negative.binomial(0.06758479),
-                    fam.negative.binomial(0.56971309),
-                    fam.negative.binomial(0.006770819),
-                    fam.negative.binomial(0.30670838), 
-                    fam.negative.binomial(0.009840565),
-                    fam.negative.binomial(1.420398e-01),
-                    fam.negative.binomial(8.883848e-02))
-
-
-#alvar aster analysis with only fitness data
-aout.a1<- aster(resp~varb, pred, fam, varb, id, root, data=redata.mba,famlist = famlist.mba)
-
-summary(aout.a1, show.graph=T, info.tol=1e-10)
-
-
-
-aout<- aster(resp~varb +fit:(Block.ID), pred, fam, varb, id, root, data=redata.mba,famlist = famlist.mba)
-
-summary(aout, show.graph=T, info.tol = 1e-10)
-
-anova(aout.a1, aout)#block not sig. for mb_alvar, but that's ok
-
-
-
-# generate MLE of saturated model mean value parameter vector: mu
-pout<- predict.aster(aout, se.fit=TRUE, info.tol=1e-10)
-
-# make up  data for hypothetical individual that meet "typical" criteria:
-# Therefore, "make up" covariate data for hypothetical individuals that are comparable and obtain mean values for them
-
-# make data.frame of indivudals for each habitat type (Alvar and Prairie)
-
-fred <- data.frame(Block.ID=levels(redata.mba$Block.ID),
-                   Germination.Y.N=1, Survival.Y.N=1,Surv2017=1, Flower.Y.N.2016=1,
-                   No.Flowers.2016=1, Flower.Y.N.2017=1, Total.Flowers.2017=1, 
-                   No.Fruit.2016=1, No.Fruit.2017=1, sm=1, sm.2=1, sm2017=1,root = 1)
-
-# reshape the "made up data" just as the actual data
-renewdata <- reshape(fred, varying = list(vars),
-                     direction = "long", timevar = "varb",
-                     times = as.factor(vars), v.names = "resp")
-
-# make character string from "varb" of renewdata, without actual values (e.g., the layers of varb in renewdata)
-layer<- gsub("[0-9]", "", as.character(renewdata$varb))
-
-# add layer to renewdata
-renewdata<- data.frame(renewdata, layer= layer)
-
-# add Seedmass.2016 in new layer col of renewdata as numeric, called fit
-fit<- as.numeric(layer=="sm2017")
-
-#charlie add
-renewdata$fit <- as.numeric(as.character(renewdata$varb) == "sm2017")
-
-# add fit to renewdata
-renewdata<- data.frame(renewdata, fit = fit)
-
-
-#Generate fintess estimates and standard errors for each block
-nReg<- nrow(fred)#all data has same number of blocks so any file will do
-nnode<- length(vars)
-amat<- array(0, c(nReg, nnode, nReg))
-dim(amat)# makes an 12 x 12 x 12 matrix (2 habitat types and 6 nodes of graphicla model)
-
-#only want means for k'th individual that contribute to expected
-#fitness, and want to add only Seedmass.2016 entries
-
-foo<- grepl("sm2017", vars)
-for(k in 1:nReg)
-  amat[k, foo, k]<- 1
-
-#check
-foo #yes, only last node is "true"; corresponds to Seedmass.2016
-
-#generate predicted valuses using aout object, with renewdata, and amat format
-pout.amat<- predict(aout, newdata= renewdata, varvar= varb,
-                    idvar= id, root = root, se.fit=TRUE, amat = amat, info.tol=1e-10)
-
-#combine estimates with standard error, and then round
-#to three decimal places
-mb.a<- cbind(pout.amat$fit, pout.amat$se.fit)
-
-
-rownames(mb.a)<- as.character(fred$Block.ID)
-
-
-colnames(mb.a)<- c("Expected Fitness", "SE")
-
-#Expected fitness for blocks in GL_alvar region
-
-#as block does not explain a sifnificant amount of variation, can omit and used following estimates
-round(mb.a, 3) 
-
-summary(mb.a)#median: 94.55 ->corresponds to block 4: 93.6 (64.409)
-
-#######################################################################################
-## Now do Prairie analysis
-
-#begin estimating 'alvar' distributions
-
-flwno1<- dat2.p$No.Flowers.2016
-
-flwno2<- dat2.p$Total.Flowers.2017
-
-frt1<- dat2.p$No.Fruit.2016
-
-frt2<- dat2.p$No.Fruit.2017
-
-sm<- dat2.p$sm
-
-sm2<- dat2.p$sm.2
-
-sm2017<- dat2.p$sm2017
-
-
-#flwno1
-flwno1.1 <- fitdistr(flwno1, "normal")
-flwno1.2 <- fitdistr(flwno1, "negative binomial")#size: 0.028979806
-flwno1.3 <- fitdistr(flwno1, "poisson")
-
-AIC(flwno1.1, flwno1.2, flwno1.3)
-flwno1.2
-
-#flwno2
-flwno2.1 <- fitdistr(flwno2, "normal")
-flwno2.2 <- fitdistr(flwno2, "negative binomial")#size: 0.13857497
-flwno2.3 <- fitdistr(flwno2, "poisson")
-
-AIC(flwno2.1, flwno2.2, flwno2.3)
-flwno2.2
-
-#frt1
-frt1.1 <- fitdistr(frt1, "normal")
-frt1.2 <- fitdistr(frt1, "negative binomial")#size: 0.003323081
-frt1.3 <- fitdistr(frt1, "poisson")
-
-AIC(frt1.1, frt1.2, frt1.3)
-frt1.2
-
-#frt2
-frt2.1 <- fitdistr(frt2, "normal")
-frt2.2 <- fitdistr(frt2, "negative binomial")#size: 0.11502653
-frt2.3 <- fitdistr(frt2, "poisson")
-
-AIC(frt2.1, frt2.2, frt2.3)
-frt2.2
-
-#sm
-sm.1 <- fitdistr(sm, "normal")
-sm.2 <- fitdistr(sm, "negative binomial")#size: 0.009840565
-sm.3 <- fitdistr(sm, "poisson")
-
-AIC(sm.1, sm.2, sm.3)
-sm.2
-
-#sm.2
-sm2.1 <- fitdistr(sm2, "normal")
-sm2.2 <- fitdistr(sm2, "negative binomial")#size: 0.034831540
-sm2.3 <- fitdistr(sm2, "poisson")
-
-AIC(sm2.1, sm2.2, sm2.3)
-sm2.2
-
-#sm2017
-sm2017.1 <- fitdistr(sm2017, "normal")
-sm2017.2 <- fitdistr(sm2017, "negative binomial")#size: 0.03511662
-sm2017.3 <- fitdistr(sm2017, "poisson")
-
-AIC(sm2017.1, sm2017.2, sm2017.3)
-sm2017.2
-
-#make new famlist for alvar data
-famlist.p <- list(fam.bernoulli(),
-                    fam.negative.binomial(0.028979806),
-                    fam.negative.binomial(0.13857497),
-                    fam.negative.binomial(0.003323081),
-                    fam.negative.binomial(0.11502653), 
-                    fam.negative.binomial(0.009840565),
-                    fam.negative.binomial(0.034831540),
-                    fam.negative.binomial(0.03511662))
-
-
-#alvar aster analysis with only fitness data
-aout.a1<- aster(resp~varb, pred, fam, varb, id, root, data=redata.p,famlist = famlist.p)
-
-summary(aout.a1, show.graph=T, info.tol=1e-10)
-
-
-
-aout<- aster(resp~varb +fit:(Block.ID), pred, fam, varb, id, root, data=redata.p,famlist = famlist.p)
-
-summary(aout, show.graph=T, info.tol = 1e-10)
-
-anova(aout.a1, aout)#block not sig. for prairie, but that's ok
-
-
-
-# generate MLE of saturated model mean value parameter vector: mu
-pout<- predict.aster(aout, se.fit=TRUE, info.tol=1e-10)
-
-# make up  data for hypothetical individual that meet "typical" criteria:
-# Therefore, "make up" covariate data for hypothetical individuals that are comparable and obtain mean values for them
-
-# make data.frame of indivudals for each habitat type (Alvar and Prairie)
-
-fred <- data.frame(Block.ID=levels(redata.p$Block.ID),
-                   Germination.Y.N=1, Survival.Y.N=1,Surv2017=1, Flower.Y.N.2016=1,
-                   No.Flowers.2016=1, Flower.Y.N.2017=1, Total.Flowers.2017=1, 
-                   No.Fruit.2016=1, No.Fruit.2017=1, sm=1, sm.2=1,sm2017=1, root = 1)
-
-# reshape the "made up data" just as the actual data
-renewdata <- reshape(fred, varying = list(vars),
-                     direction = "long", timevar = "varb",
-                     times = as.factor(vars), v.names = "resp")
-
-# make character string from "varb" of renewdata, without actual values (e.g., the layers of varb in renewdata)
-layer<- gsub("[0-9]", "", as.character(renewdata$varb))
-
-# add layer to renewdata
-renewdata<- data.frame(renewdata, layer= layer)
-
-# add Seedmass.2016 in new layer col of renewdata as numeric, called fit
-fit<- as.numeric(layer=="sm2017")
-
-#charlie add
-renewdata$fit <- as.numeric(as.character(renewdata$varb) == "sm2017")
-
-# add fit to renewdata
-renewdata<- data.frame(renewdata, fit = fit)
-
-
-#Generate fintess estimates and standard errors for each block
-nReg<- nrow(fred)#all data has same number of blocks so any file will do
-nnode<- length(vars)
-amat<- array(0, c(nReg, nnode, nReg))
-dim(amat)# makes an 12 x 12 x 12 matrix (2 habitat types and 6 nodes of graphicla model)
-
-#only want means for k'th individual that contribute to expected
-#fitness, and want to add only Seedmass.2016 entries
-
-foo<- grepl("sm2017", vars)
-for(k in 1:nReg)
-  amat[k, foo, k]<- 1
-
-#check
-foo #yes, only last node is "true"; corresponds to Seedmass.2016
-
-#generate predicted valuses using aout object, with renewdata, and amat format
-pout.amat<- predict(aout, newdata= renewdata, varvar= varb,
-                    idvar= id, root = root, se.fit=TRUE, amat = amat, info.tol=1e-10)
-
-#combine estimates with standard error, and then round
-#to three decimal places
-pr<- cbind(pout.amat$fit, pout.amat$se.fit)
-
-
-rownames(pr)<- as.character(fred$Block.ID)
-
-
-colnames(pr)<- c("Expected Fitness", "SE")
-
-#Expected fitness for blocks in GL_alvar region
-
-#as block does not explain a sifnificant amount of variation, can omit and used following estimates
-round(pr, 3) 
-
-summary(pr)#median: 68.02 -> corresponds to block 8: 70.379 (75.872)
-
-
-
