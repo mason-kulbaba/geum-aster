@@ -241,6 +241,7 @@ dat.pr$Block.ID<- as.factor(dat.pr$Block.ID)
 
 # GL_alvar
 
+
 gla_flw2017<- glmer.nb(Total.Flowers.2017 ~ Block.ID + Population+ (1|Family.Unique)  
                      + Block.ID : (1|Family.Unique), tol=1e-2,
                      data=dat.gla,
