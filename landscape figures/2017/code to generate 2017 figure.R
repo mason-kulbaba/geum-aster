@@ -4,10 +4,10 @@
 #Plot dist from source & days to germ, on fitness contours
 
 #load data
-dat2<- read.csv("C:/Users/Mason Kulbaba/Dropbox/git/geum-aster/landscape figures/2017/dat2.csv")
+dat2<- read.csv("dat2.csv")
 
 #load 2017 aster model
-load("C:/Users/Mason Kulbaba/Dropbox/git/geum-aster/landscape figures/2017/aout.RData")
+load("aout.RData")
 
 #check for coefficients
 
@@ -41,8 +41,8 @@ legend("topright", inset=c(-.6,0), legend=c("Great Lakes Alvar", "Manitoba Alvar
 
 
 ufoo <- par("usr")
-nx <- 3
-ny <- 3
+nx <- 101
+ny <- 101
 z <- matrix(NA, nx, ny)
 x <- seq(ufoo[1], ufoo[2], length = nx)
 y <- seq(ufoo[3], ufoo[4], length = ny)
