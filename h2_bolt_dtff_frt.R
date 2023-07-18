@@ -1,10 +1,13 @@
-setwd("C:/Users/Mason Kulbaba/Dropbox/git/geum-aster/")
+setwd("C:/Users/mason/Dropbox/git/geum-aster")
 
-dat<- read.csv("C:/Users/Mason Kulbaba/Dropbox/git/geum-aster/final_data.csv")
+dat<- read.csv("final_data.csv")
 
 library(MASS)
 
 library(lme4)
+
+
+
 
 #####################################
 #
@@ -754,8 +757,7 @@ AIC(nor, nb, po, ga)#nb
 #models for : GL_alvar
 gla_DTFF2016<- glmer.nb(no.Planting.to.DTFF ~ Block.ID +Population+ (1|Family.Unique)  
                       + Block.ID : (1|Family.Unique),
-                      data=dat.gla, tol=1e-1,
-                     control=glmerControl(optimizer="Nelder_Mead",
+                      data=dat.gla, control=glmerControl(optimizer="Nelder_Mead",
                                           optCtrl=list(maxfun=1e5)))
 
 isSingular(gla_DTFF2016)#False

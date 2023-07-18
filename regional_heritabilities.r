@@ -8,7 +8,10 @@ library(fitdistrplus)
 ##NOTE: Distributions for variables in ASTER analysis taken from there##
 	##shape parameters changed, however##
 ##cleaned data from aster model datasheet in git repo##
-df <- read.csv("cleaned_NV_CG_experiment_data.csv")
+
+setwd("C:/Users/Mason Kulbaba/Dropbox/Rscripts/aster-analysis/h2_Cva")
+
+df <- read.csv("cleaned_NV_CG_heritability_data_v2.csv")
 #View(df)
 
 ###########################################################
